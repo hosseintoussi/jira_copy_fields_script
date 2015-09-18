@@ -4,7 +4,7 @@ require 'yaml'
 
 config = YAML.load_file('config.yml')
 
-project_url = "https://mindvalley.atlassian.net/rest/api/2/search?jql=project='#{config['project']}'&maxResults=#{config['max_results']}"
+project_url = "#{config['base_url']}/rest/api/2/search?jql=project='#{config['project']}'&maxResults=#{config['max_results']}"
 uri = URI(project_url.strip)
 all_issues = ""
 # puts "============magic==========="
