@@ -1,7 +1,7 @@
 username: 'xxxxxx'
 password: 'xxxxxx'
 project: 'PLAY'
-base_url: 'https://mindvalley.atlassian.net'
+base_url: 'xxxxxxxxxxxxx'
 max_results: 100
-old_custom_field: 'customfield_11430'
-new_custom_field: 'customfield_12000'
+old_custom_field: '<customfield_id>'
+new_custom_field: '<customfield_id>'
