@@ -36,7 +36,7 @@ all_issues["issues"].each do |issue|
   if !issue["fields"]["#{config['old_custom_field']}"].nil?
     old_field_value = issue["fields"]["#{config['old_custom_field']}"]
     new_field = config['new_custom_field']
-    url = "https://mindvalley.atlassian.net/rest/api/2/issue/#{issue["key"]}"
+    url = "#{config['base_url']}/rest/api/2/issue/#{issue["key"]}"
     uri1 = URI(url.strip)
     puts "#{config['old_custom_field']} of #{issue["key"]} has the value of: #{old_field_value}"
 
