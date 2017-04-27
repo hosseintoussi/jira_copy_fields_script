@@ -26,7 +26,7 @@ class Config
   end
 end
 
-class Perform
+class JiraCopyFields
   attr_reader :config
 
   def initialize(config = Config.new)
@@ -52,7 +52,7 @@ class Perform
     req.basic_auth(config.username, config.password)
     req["Content-Type"] = "application/json"
     req.body = "{\"fields\":{\"#{new_field}\":\"#{old_field_value}\"}}"
-    Net::HTTP.start(post_uri.host, post_uri.port, :use_ssl => config.project_uri.scheme == "https", :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+    Net::HTTP.start(post_uri(issue["key"]).host, post_uri(issue["key"]).port, :use_ssl => config.project_uri.scheme == "https", :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
       puts http.request(req)
     end
   end
@@ -72,4 +72,6 @@ class Perform
 end
 
 
+## Runs here
+JiraCopyFields.new.run
 
