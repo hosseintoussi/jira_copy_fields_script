@@ -22,7 +22,7 @@ class Config
   end
 
   def project_uri
-    URI("#{config['base_url']}/rest/api/2/search?jql=project='#{config['project']}'&maxResults=#{config['max_results']}")
+    URI("#{base_url}/rest/api/2/search?jql=project='#{project}'&maxResults=#{max_results}")
   end
 end
 
