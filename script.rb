@@ -1,57 +1,75 @@
-require 'net/https'
-require 'JSON'
-require 'yaml'
+require "net/https"
+require "JSON"
+require "yaml"
 
-config = YAML.load_file('config.yml')
+class Config
+  attr_reader :base_url,
+    :project,
+    :max_results,
+    :username,
+    :password,
+    :old_custom_field,
+    :new_custom_field
 
-project_url = "#{config['base_url']}/rest/api/2/search?jql=project='#{config['project']}'&maxResults=#{config['max_results']}"
-uri = URI(project_url.strip)
-all_issues = ""
-# puts "============magic==========="
-# puts project_url
-# puts config['project']
-# puts config['username']
-# puts config['password']
-# puts config['old_custom_field']
-# puts config['new_custom_field']
-# puts "======================="
-
-
-Net::HTTP.start(uri.host, uri.port,
-                :use_ssl => uri.scheme == 'https',
-:verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
-
-  request = Net::HTTP::Get.new uri.request_uri
-  request.basic_auth "#{config['username']}", "#{config['password']}"
-
-  response = http.request request # Net::HTTPResponse object
-
-  all_issues = JSON.parse(response.body)
-end
-
-puts "Total issues: #{all_issues["total"]}"
-
-all_issues["issues"].each do |issue|
-  puts "======================="
-  if !issue["fields"]["#{config['old_custom_field']}"].nil?
-    old_field_value = issue["fields"]["#{config['old_custom_field']}"]
-    new_field = config['new_custom_field']
-    url = "#{config['base_url']}/rest/api/2/issue/#{issue["key"]}"
-    uri1 = URI(url.strip)
-    puts "#{config['old_custom_field']} of #{issue["key"]} has the value of: #{old_field_value}"
-
-    req = Net::HTTP::Put.new uri1.request_uri
-    req.basic_auth "#{config['username']}", "#{config['password']}"
-    req['Content-Type'] = 'application/json'
-    req.body = "{\"fields\":{\"#{new_field}\":\"#{old_field_value}\"}}"
-    Net::HTTP.start(uri1.host, uri1.port,
-                    :use_ssl => uri.scheme == 'https',
-    :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
-      response = http.request req
-      puts response
-    end
-  else
-    puts "Skipping for #{issue["key"]} as there is no field of #{config['old_custom_field']}."
+  def initialize(file = YAML.load_file("config.yml"))
+    @base_url = file["base_url"]
+    @project = file["project"]
+    @max_results = file["max_results"]
+    @username = file["username"]
+    @password = file["password"]
+    @old_custome_field = file["old_custom_field"]
+    @new_custome_field = file["new_custom_field"]
   end
-  puts "======================="
+
+  def project_uri
+    URI("#{config['base_url']}/rest/api/2/search?jql=project='#{config['project']}'&maxResults=#{config['max_results']}")
+  end
 end
+
+class Perform
+  attr_reader :config
+
+  def initialize(config = Config.new)
+    @config = config
+  end
+
+  def run
+    all_issues["issues"].each do |issue|
+      puts "======================="
+      next unless issue["fields"][config.old_suctom_url]
+
+      update_issue(issue)
+    end
+  end
+
+  private
+
+  def update_issue(issue)
+    old_field_value = issue["fields"][config.old_custom_url]
+    new_field = config.new_custom_url
+
+    req = Net::HTTP::Put.new post_uri.request_uri
+    req.basic_auth(config.username, config.password)
+    req["Content-Type"] = "application/json"
+    req.body = "{\"fields\":{\"#{new_field}\":\"#{old_field_value}\"}}"
+    Net::HTTP.start(post_uri.host, post_uri.port, :use_ssl => config.project_uri.scheme == "https", :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+      puts http.request(req)
+    end
+  end
+
+  def post_uri(key)
+    URI("#{config.base_url}/rest/api/2/issue/#{key}".strip)
+  end
+
+  def all_issues
+    @_all_issues ||= Net::HTTP.start(project_uri.host, project_uri.port, :use_ssl => uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+      request = Net::HTTP::Get.new uri.request_uri
+      request.basic_auth(config.username, config.password)
+      response = http.request request # Net::HTTPResponse object
+      JSON.parse(response.body)
+    end
+  end
+end
+
+
+
