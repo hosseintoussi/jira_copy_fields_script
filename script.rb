@@ -22,7 +22,7 @@ class Config
   end
 
   def project_uri
-    URI("#{base_url}/rest/api/2/search?jql=project='#{project}'&maxResults=#{max_results}")
+    URI("#{base_url}/rest/api/2/search?jql=project='#{project}'&maxResults=#{max_results}".strip)
   end
 end
 
@@ -62,7 +62,7 @@ class JiraCopyFields
   end
 
   def all_issues
-    @_all_issues ||= Net::HTTP.start(project_uri.host, project_uri.port, :use_ssl => uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
+    @_all_issues ||= Net::HTTP.start(config.project_uri.host, config.project_uri.port, :use_ssl => config.project_uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
       request = Net::HTTP::Get.new uri.request_uri
       request.basic_auth(config.username, config.password)
       response = http.request request # Net::HTTPResponse object
