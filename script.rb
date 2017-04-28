@@ -36,8 +36,7 @@ class JiraCopyFields
   def run
     all_issues["issues"].each do |issue|
       puts "======================="
-      next unless issue["fields"][config.old_suctom_url]
-
+      next unless issue["fields"][config.old_custom_field]
       update_issue(issue)
     end
   end
@@ -45,8 +44,8 @@ class JiraCopyFields
   private
 
   def update_issue(issue)
-    old_field_value = issue["fields"][config.old_custom_url]
-    new_field = config.new_custom_url
+    old_field_value = issue["fields"][config.old_custom_field]
+    new_field = config.new_custome_field
 
     req = Net::HTTP::Put.new post_uri.request_uri
     req.basic_auth(config.username, config.password)
@@ -58,12 +57,12 @@ class JiraCopyFields
   end
 
   def post_uri(key)
-    URI("#{config.base_url}/rest/api/2/issue/#{key}".strip)
+    URI("#{base_url}/rest/api/2/issue/#{key}".strip)
   end
 
   def all_issues
     @_all_issues ||= Net::HTTP.start(config.project_uri.host, config.project_uri.port, :use_ssl => config.project_uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
-      request = Net::HTTP::Get.new uri.request_uri
+      request = Net::HTTP::Get.new config.project_uri.request_uri
       request.basic_auth(config.username, config.password)
       response = http.request request # Net::HTTPResponse object
       JSON.parse(response.body)
