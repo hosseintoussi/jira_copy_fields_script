@@ -1,0 +1,7 @@
+username: '<username>'
+password: '<password>'
+project: '<project_name>'
+base_url: '<base_url>'
+max_results: 100
+old_custom_field: '<field_id>'
+new_custom_field: '<field_id>'
